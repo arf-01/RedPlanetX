@@ -1,6 +1,7 @@
 package com.example.redplanetx;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -39,7 +41,7 @@ public class MainActivity2 extends AppCompatActivity {
 
         if (title == null || title.isEmpty()) {
             Toast.makeText(this, "Title is missing", Toast.LENGTH_SHORT).show();
-            finish(); // Close activity if title is missing
+            finish();
             return;
         }
 
@@ -49,61 +51,100 @@ public class MainActivity2 extends AppCompatActivity {
         adapter = new InfoAdapter(this, photos);
         recyclerView.setAdapter(adapter);
 
-        progressBar = findViewById(R.id.progressBar); // Add a progress bar in the layout
-        progressBar.setVisibility(View.VISIBLE); // Show the progress bar
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.VISIBLE);
 
-        fetchMarsPhotos(title); // Pass title to fetchMarsPhotos
+        // Execute AsyncTask to fetch data
+        new FetchMarsPhotosTask().execute(title);
     }
 
-    private void fetchMarsPhotos(String title) {
-        String url = "https://api.nasa.gov/mars-photos/api/v1/manifests/" + title + "?api_key=B2hgw9SAQTLZuseGzrt25cwLnyjaTrTcyBm1TUfY";
+    private class FetchMarsPhotosTask extends AsyncTask<String, Void, List<info>> {
 
-        RequestQueue queue = Volley.newRequestQueue(this);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+        @Override
+        protected List<info> doInBackground(String... params) {
+            String title = params[0];
+            String url = "https://api.nasa.gov/mars-photos/api/v1/manifests/" + title + "?api_key=B2hgw9SAQTLZuseGzrt25cwLnyjaTrTcyBm1TUfY";
 
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        progressBar.setVisibility(View.GONE); // Hide the progress bar
+            final List<info> fetchedPhotos = new ArrayList<>();
+            final Object lock = new Object(); // Lock object to synchronize
 
-                        try {
-                            JSONObject photoManifest = response.optJSONObject("photo_manifest");
-                            if (photoManifest != null) {
-                                JSONArray photosArray = photoManifest.optJSONArray("photos");
-                                if (photosArray != null) {
-                                    for (int i = 0; i < photosArray.length(); i++) {
-                                        JSONObject photoObject = photosArray.getJSONObject(i);
-                                        int sol = photoObject.optInt("sol", 0);
-                                        String earthDate = photoObject.optString("earth_date", "N/A");
-                                        int numPhotos = photoObject.optInt("total_photos", 0);
+            RequestQueue queue = Volley.newRequestQueue(MainActivity2.this);
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                JSONObject photoManifest = response.optJSONObject("photo_manifest");
+                                if (photoManifest != null) {
+                                    JSONArray photosArray = photoManifest.optJSONArray("photos");
+                                    if (photosArray != null) {
+                                        for (int i = 0; i < photosArray.length(); i++) {
+                                            JSONObject photoObject = photosArray.getJSONObject(i);
+                                            int sol = photoObject.optInt("sol", 0);
+                                            String earthDate = photoObject.optString("earth_date", "N/A");
+                                            int numPhotos = photoObject.optInt("total_photos", 0);
 
-                                        info Info = new info(sol, earthDate, numPhotos);
-                                        photos.add(Info);
+                                            info Info = new info(sol, earthDate, numPhotos);
+                                            fetchedPhotos.add(Info);
+                                        }
                                     }
-
-                                    adapter.notifyDataSetChanged();
-                                } else {
-                                    Toast.makeText(MainActivity2.this, "No photos found", Toast.LENGTH_SHORT).show();
                                 }
-                            } else {
-                                Toast.makeText(MainActivity2.this, "Invalid response format", Toast.LENGTH_SHORT).show();
+                            } catch (JSONException e) {
+                                Log.e("FetchMarsPhotosTask", "JSON Exception", e);
                             }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Toast.makeText(MainActivity2.this, "Error parsing data", Toast.LENGTH_SHORT).show();
+                            synchronized (lock) {
+                                lock.notify(); // Notify that data has been fetched
+                            }
                         }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("Volley", "Error: " + error.getMessage());
+                    synchronized (lock) {
+                        lock.notify(); // Notify that there was an error
                     }
-                }, new Response.ErrorListener() {
+                }
+            });
 
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        progressBar.setVisibility(View.GONE); // Hide the progress bar in case of error
-                        Log.e("Volley", "Error: " + error.getMessage());
-                        Toast.makeText(MainActivity2.this, "Failed to load data", Toast.LENGTH_SHORT).show();
-                    }
-                });
+            // Set timeout, retry policy, and cache
+            jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(
+                    30000, // 30 seconds timeout
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
-        queue.add(jsonObjectRequest);
+            jsonObjectRequest.setShouldCache(true);
+
+            queue.add(jsonObjectRequest);
+
+            // Wait until the data fetching is done
+            synchronized (lock) {
+                try {
+                    lock.wait(); // Wait for the notification
+                } catch (InterruptedException e) {
+                    Log.e("FetchMarsPhotosTask", "Wait interrupted", e);
+                }
+            }
+
+            return fetchedPhotos;
+        }
+
+        @Override
+        protected void onPostExecute(List<info> result) {
+            progressBar.setVisibility(View.GONE);
+            if (result != null && !result.isEmpty()) {
+                photos.clear(); // Clear existing data
+                photos.addAll(result); // Add fetched data
+                adapter.notifyDataSetChanged();
+                Toast.makeText(MainActivity2.this, "Data Loaded", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity2.this, "No data available", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(MainActivity2.this, "Failed to load data", Toast.LENGTH_SHORT).show();
+        }
     }
 }
