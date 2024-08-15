@@ -1,18 +1,45 @@
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:padding="16dp">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="0dp"
+    <!-- List View -->
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_weight="1" />
+
+    <!-- Menu Bar at the Bottom -->
+    <LinearLayout
+        android:id="@+id/menu_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@android:color/white"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/icon_rovers"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/rover"
+            android:contentDescription="Rovers"
+            android:layout_weight="1"
+            android:layout_gravity="start" />
+
+        <ImageView
+            android:id="@+id/icon_saved"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/save"
+            android:contentDescription="Saved"
+            android:layout_weight="1"
+            android:layout_gravity="end" />
+    </LinearLayout>
+
+</LinearLayout>

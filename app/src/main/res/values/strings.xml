@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">RedPlanetX</string>
+    <string name="image_desc">Description of the image</string>
 </resources>

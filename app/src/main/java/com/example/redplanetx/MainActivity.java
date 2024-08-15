@@ -1,51 +1,42 @@
 package com.example.redplanetx;
-import androidx.appcompat.app.AppCompatActivity;
-import android.graphics.Bitmap;
+
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Toast;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageRequest;
-import com.android.volley.toolbox.Volley;
+import android.widget.ListView;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ImageView imageView;
-    private RequestQueue requestQueue;
+    private ListView listView;
+    private ImageView roverIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imageView = findViewById(R.id.imageView);
-        requestQueue = Volley.newRequestQueue(this);
+        listView = findViewById(R.id.listView);
+        roverIcon = findViewById(R.id.icon_rovers);
 
-        fetchMarsPhoto();
-    }
+        // Sample data
+        String[] titles = {"Curiosity Rover", "Opportunity Rover", "Spirit Rover", "Perseverance Rover"};
+        int[] images = {R.drawable.perseverance, R.drawable.opportunity, R.drawable.spirit, R.drawable.perseverance1};
+        String[] descriptions = {
+                "Explore the rover used in Mars missions.",
+                "A beautiful landscape on Mars.",
+                "The surface of the red planet.",
+                "A deep crater on Mars."
+        };
 
-    private void fetchMarsPhoto() {
-        String url = "https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/fcam/FLB_486265257EDR_F0481570FHAZ00323M_.JPG";
+        // Pass all four arguments to the CustomAdapter
+        CustomAdapter adapter = new CustomAdapter(this, titles, images, descriptions);
+        listView.setAdapter(adapter);
+       roverIcon.setOnClickListener(view -> {
+            // Start the MainActivity when the rover icon is clicked
+            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+            startActivity(intent);
+        });
 
-        ImageRequest imageRequest = new ImageRequest(url,
-                new Response.Listener<Bitmap>() {
-                    @Override
-                    public void onResponse(Bitmap response) {
-                        imageView.setImageBitmap(response);
-                    }
-                },
-                0, 0, ImageView.ScaleType.CENTER_CROP, null,
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("VolleyError", "Error: " + error.toString());
-                        Toast.makeText(MainActivity.this, "Error loading image", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-        requestQueue.add(imageRequest);
     }
 }
