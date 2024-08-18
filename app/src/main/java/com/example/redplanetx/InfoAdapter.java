@@ -1,6 +1,7 @@
 package com.example.redplanetx;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,12 @@ public class InfoAdapter extends RecyclerView.Adapter<InfoAdapter.InfoViewHolder
         holder.solTextView.setText("Sol: " + Info.getSol());
         holder.earthDateTextView.setText("Earth Date: " + Info.getEarthDate());
         holder.numPhotosTextView.setText("Number of Photos: " + Info.getNumPhotos());
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, PhotoDetailsActivity.class);
+            intent.putExtra("sol", Info.getSol());
+            context.startActivity(intent);
+        });
     }
 
     @Override
