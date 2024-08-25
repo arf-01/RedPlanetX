@@ -89,7 +89,7 @@ public class MainActivity2 extends AppCompatActivity {
                                         String earthDate = photoObject.optString("earth_date", "N/A");
                                         int numPhotos = photoObject.optInt("total_photos", 0);
 
-                                        info Info = new info(sol, earthDate, numPhotos);
+                                        info Info = new info(sol, earthDate, numPhotos, title);
                                         fetchedPhotos.add(Info);
                                     }
                                     callback.onSuccess(fetchedPhotos);

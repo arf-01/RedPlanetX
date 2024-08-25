@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
     private ListView listView;
-    private ImageView roverIcon;
+    //private ImageView roverIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,16 +18,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         listView = findViewById(R.id.listView);
-        roverIcon = findViewById(R.id.icon_rovers);
+      // roverIcon = findViewById(R.id.icon_rovers);
 
         // Sample data
-        String[] titles = {"Curiosity", "Opportunity", "Spirit", "Perseverance"};
+        String[] titles = {"curiosity", "opportunity", "spirit", "perseverance"};
         int[] images = {R.drawable.perseverance, R.drawable.opportunity, R.drawable.spirit, R.drawable.perseverance1};
         String[] descriptions = {
-                "Explore the rover used in Mars missions.",
-                "A beautiful landscape on Mars.",
-                "The surface of the red planet.",
-                "A deep crater on Mars."
+                "November 26, 2011",
+                "July 7, 2003",
+                "June 10, 2003",
+                "July 30, 2020"
         };
 
         // Pass all four arguments to the CustomAdapter
@@ -41,9 +41,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        roverIcon.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, MainActivity.class);
-            startActivity(intent);
-        });
+
     }
 }

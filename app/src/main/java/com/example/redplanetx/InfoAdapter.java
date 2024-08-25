@@ -37,6 +37,7 @@ public class InfoAdapter extends RecyclerView.Adapter<InfoAdapter.InfoViewHolder
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, PhotoDetailsActivity.class);
             intent.putExtra("sol", Info.getSol());
+            intent.putExtra("rover_name", Info.getRoverName());
             context.startActivity(intent);
         });
     }

@@ -36,7 +36,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
         // Use Glide to load the image
         Glide.with(context)
                 .load(photo.getImgSrc())
-                .placeholder(R.drawable.mars_landscape) // Optional placeholder
+                .placeholder(R.drawable.loading) // Optional placeholder
                 .error(R.drawable.error) // Optional error image
                 .into(holder.photoImageView);
     }

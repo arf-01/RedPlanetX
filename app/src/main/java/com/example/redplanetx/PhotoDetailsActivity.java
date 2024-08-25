@@ -32,6 +32,7 @@ public class PhotoDetailsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_details);
 
@@ -45,6 +46,7 @@ public class PhotoDetailsActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
 
         Intent intent = getIntent();
+
         int sol = intent.getIntExtra("sol", -1);
 
         if (sol == -1) {
@@ -75,7 +77,8 @@ public class PhotoDetailsActivity extends AppCompatActivity {
     }
 
     private void fetchPhotos(int sol, final FetchPhotosCallback callback) {
-        String url = "https://api.nasa.gov/mars-photos/api/v1/rovers/opportunity/photos?sol=" + sol + "&api_key=B2hgw9SAQTLZuseGzrt25cwLnyjaTrTcyBm1TUfY";
+        String roverName =getIntent().getStringExtra("rover_name");;
+        String url = "https://api.nasa.gov/mars-photos/api/v1/rovers/" + roverName + "/photos?sol=" + sol + "&api_key=B2hgw9SAQTLZuseGzrt25cwLnyjaTrTcyBm1TUfY";
 
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
